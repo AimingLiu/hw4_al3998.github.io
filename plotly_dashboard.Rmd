@@ -1,0 +1,84 @@
+---
+title: "plotly dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(viridis)
+library(ggplot2)
+library(p8105.datasets)
+library(plotly)
+library(ggridges)
+library(flexdashboard)
+library(dplyr)
+```
+
+
+I choose the dataset "NYC Restaurant Inspections".
+
+```{r include=FALSE}
+ data("rest_inspec")
+```
+
+Column {data-width=550}
+-----------------------------------------------------------------------
+
+### Boxplot
+
+This pictures shows the scores distribution of different boroughs
+```{r echo = FALSE, fig.align='center'}
+  rest_inspec %>% 
+  select(score,boro) %>%
+  drop_na() %>% 
+  mutate(boro = fct_reorder(boro, score)) %>% 
+  plot_ly(y = ~score, color = ~boro, type = "box",
+          colors = "Set2")
+
+```
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+
+### Plotly Barchart 
+
+This picture shows the count of Top 25 cuisine in Manhattan
+```{r echo = FALSE,message=FALSE,warning=FALSE}
+    rest_inspec %>%
+    select(boro,cuisine_description) %>% 
+    filter(boro == "MANHATTAN") %>% 
+    group_by(cuisine_description) %>% 
+    summarise(count = n()) %>%
+    top_n(25) %>% 
+    mutate(cuisine_description = 
+           recode(cuisine_description,
+            "Latin (Cuban, Dominican, Puerto Rican, South & Central American)" = "Latin",
+            "Sandwiches/Salads/Mixed Buffet" = "SSMB",
+            "Juice, Smoothies, Fruit Salads" = "JSFS"),
+           cuisine_description = fct_reorder(cuisine_description, count)) %>%
+   plot_ly(x = ~cuisine_description,
+           y = ~count,color = ~cuisine_description,type = "bar") %>% 
+    layout(margin = list(b = 150),
+           title = "count of Top 25 cuisine in Manhattan",showlegend = FALSE)
+```
+
+### Line Chart
+
+This picture shows  number of restaurants be graded in different months and years
+```{r echo = FALSE,message=FALSE,warning=FALSE}
+  rest_inspec %>%
+  select(grade_date,dba) %>% 
+  mutate(dates_with_months = format(grade_date,"%B"),dates_with_year=format(grade_date,"%Y")) %>% 
+  group_by(dates_with_year,dates_with_months) %>% 
+  summarise(number_rest = n()) %>% 
+  plot_ly(x = ~dates_with_months,y = ~number_rest,
+          type = "scatter", mode = "lines",color = ~dates_with_year) %>% 
+   layout(title = "Number of restaurants be graded in different months and years",
+          xaxis =list(title = "Dates with month"), yaxis =list(title = "Number of restaurants"))
+  
+```
+
