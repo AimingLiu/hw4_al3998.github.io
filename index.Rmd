@@ -26,3 +26,8 @@ output:
 
 - __If you want to know me more specifically,click the four parts on the top of this website!__
 
+***
+### Problem 2
+***
+- __Here is my answer for problem 2,click [here](plotly_dashboard.html)__
+
